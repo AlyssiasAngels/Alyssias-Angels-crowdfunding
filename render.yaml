@@ -1,0 +1,95 @@
+# Render Blueprint for Alyssia's Angels
+# Push this repo to GitHub, then in Render dashboard:
+#   New + → Blueprint → connect your repo → Render reads this file.
+#
+# Two services are provisioned:
+#   1) alyssias-angels-api   — FastAPI backend (Python web service)
+#   2) alyssias-angels-web   — React frontend (Static site)
+#
+# Secrets you'll set in the Render dashboard (NOT here):
+#   - MONGO_URL        (Atlas connection string with password)
+#   - JWT_SECRET       (long random string)
+#   - ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_FULL_NAME
+#   - PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET
+#   - RESEND_API_KEY, SENDER_EMAIL
+#   - EMERGENT_LLM_KEY (only if you keep using Emergent object storage)
+#
+# After the first deploy, copy the API service URL (e.g.
+# https://alyssias-angels-api.onrender.com) into the web service's
+# REACT_APP_BACKEND_URL env var and trigger a rebuild.
+
+services:
+  - type: web
+    name: alyssias-angels-api
+    runtime: python
+    plan: starter            # 7 USD/mo — keeps the service warm 24/7
+    rootDir: backend
+    region: oregon           # change if you prefer
+    healthCheckPath: /api/
+    autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DB_NAME
+        value: alyssias_angels
+      - key: APP_NAME
+        value: alyssias-angels
+      - key: PLATFORM_NAME
+        value: Alyssia's Angels
+      - key: PAYPAL_MODE
+        value: Live
+      - key: RESET_ADMIN_ON_START
+        value: "false"
+      - key: ADMIN_NOTIFICATION_EMAIL
+        sync: false                       # set in dashboard
+      - key: FRONTEND_URL
+        sync: false                       # set in dashboard once domain is live
+      # The following are set in the Render dashboard as Secrets (sync:false)
+      - key: MONGO_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_FULL_NAME
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+      - key: EMERGENT_LLM_KEY
+        sync: false
+
+  - type: web
+    name: alyssias-angels-web
+    runtime: static
+    rootDir: frontend
+    region: oregon
+    autoDeploy: true
+    buildCommand: yarn install --frozen-lockfile && yarn build
+    staticPublishPath: build
+    # SPA routing — every unknown path falls back to index.html so React Router
+    # owns the URL (e.g. /c/abc1234, /campaigns/123, /verify-email, etc.).
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /static/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        sync: false                       # paste the API URL here in dashboard
+      - key: REACT_APP_SHARE_BASE_URL
+        sync: false                       # set to https://alyssiasangels.online
+      - key: WDS_SOCKET_PORT
+        value: "443"

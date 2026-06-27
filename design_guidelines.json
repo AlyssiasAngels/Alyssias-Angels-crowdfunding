@@ -1,0 +1,119 @@
+{
+  "theme": "light",
+  "archetype": "Organic & Earthy / Trust",
+  "design_philosophy": "A trustworthy, clean, and warm community aesthetic. Focus on high legibility, professional trust, and inviting action. Generous spacing on public pages to let emotional stories breathe, combined with high-density, crisp utility in the fundraiser and admin dashboards.",
+  "colors": {
+    "primary": {
+      "DEFAULT": "#1E3A8A",
+      "foreground": "#FFFFFF",
+      "description": "Deep professional blue for trust, primary text, and headers (Tailwind blue-900)."
+    },
+    "secondary": {
+      "DEFAULT": "#0F172A",
+      "foreground": "#FFFFFF",
+      "description": "Slate-900 for high-contrast deep text and secondary emphasis."
+    },
+    "accent": {
+      "DEFAULT": "#059669",
+      "foreground": "#FFFFFF",
+      "hover": "#047857",
+      "description": "Warm emerald green for 'Donate' buttons, progress bars, and primary CTAs (Tailwind emerald-600)."
+    },
+    "background": {
+      "DEFAULT": "#F8FAFC",
+      "paper": "#FFFFFF",
+      "description": "Clean whites (paper) and soft grays (slate-50) for maximum readability."
+    },
+    "muted": {
+      "DEFAULT": "#F1F5F9",
+      "foreground": "#64748B",
+      "description": "Slate-100 for subtle card backgrounds and Slate-500 for secondary text."
+    },
+    "border": {
+      "DEFAULT": "#E2E8F0",
+      "focus": "#94A3B8"
+    },
+    "success": "#10B981",
+    "warning": "#F59E0B",
+    "destructive": "#EF4444"
+  },
+  "typography": {
+    "font_family": {
+      "heading": "'Outfit', sans-serif",
+      "body": "'DM Sans', sans-serif"
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-blue-900",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-blue-900",
+      "h3": "text-xl sm:text-2xl font-medium text-slate-900",
+      "h4": "text-lg sm:text-xl font-medium text-slate-800",
+      "body": "text-base leading-relaxed text-slate-600",
+      "small": "text-sm text-slate-500",
+      "overline": "text-xs font-bold uppercase tracking-[0.2em] text-emerald-600"
+    }
+  },
+  "spacing_and_layout": {
+    "general": "Generous spacing philosophy (p-8 to p-12) for marketing pages to give breathing room. Admin/Dashboards use tighter grid gaps (gap-4 to gap-6).",
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "marketing_grid": "Bento layout with asymmetrical column spans (e.g., col-span-full md:col-span-8 row-span-2) and wide gaps (gap-8).",
+    "dashboard_grid": "Control Room layout for admin and fundraiser dashboards. Dense grids (grid-cols-1 md:grid-cols-3 lg:grid-cols-4) with gap-6. Use h-full on children.",
+    "border_radius": "rounded-2xl for main cards, rounded-xl for buttons, rounded-full for badges and tags."
+  },
+  "surfaces_and_shadows": {
+    "glassmorphism": "Used for public sticky header: bg-white/80 backdrop-blur-xl border-b border-slate-200/50 shadow-sm. Ensures optical clarity while remaining readable.",
+    "cards": "Used for campaigns and dashboard widgets: bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200. Sharp 1px border to ground the soft shadow.",
+    "progress_bars": "bg-slate-100 rounded-full h-3 overflow-hidden. Fill is bg-emerald-500 with a subtle animated pulse effect."
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl px-6 py-3 transition-colors",
+      "secondary": "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-medium rounded-xl px-6 py-3 transition-colors"
+    },
+    "inputs": "Shadcn components heavily customized. border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 rounded-xl bg-white",
+    "badges": "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800"
+  },
+  "motion_and_interaction": {
+    "hover": "Cards lift slightly (-translate-y-1) with increased shadow. Buttons transition background colors smoothly (duration-200).",
+    "page_transitions": "Staggered fade-in for campaign grids using Framer Motion.",
+    "progress_animation": "Progress bars load from 0 to target width on mount with an ease-out transition (duration-1000)."
+  },
+  "icons_and_assets": {
+    "icon_library": "lucide-react (default) for dashboard, line-style, clean strokes. Size 20px-24px for standard icons.",
+    "image_treatment": "Images should have max-h-[80vh] on mobile. Overlay on hero image should be soft white gradient if needed, but prefer placing text on solid background next to images in light mode."
+  },
+  "media_urls": {
+    "hero": {
+      "url": "https://images.unsplash.com/photo-1758275557330-cfd545444dc3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA4Mzl8MHwxfHNlYXJjaHwxfHxkaXZlcnNlJTIwY29tbXVuaXR5JTIwcGVvcGxlJTIwc21pbGluZ3xlbnwwfHx8fDE3ODI1NTE4ODR8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Diverse community of people smiling, perfect for the public landing page hero section."
+    },
+    "category_medical": {
+      "url": "https://images.unsplash.com/photo-1586324304780-c9a5031a3599?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MDV8MHwxfHNlYXJjaHwxfHxob3NwaXRhbCUyMGRvY3RvciUyMGhvbGRpbmclMjBoYW5kc3xlbnwwfHx8fDE3ODI1NTE4ODl8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Doctor and patient holding hands, representing the Medical crowdfunding category."
+    },
+    "category_education": {
+      "url": "https://images.pexels.com/photos/37758744/pexels-photo-37758744.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Students studying in a classroom, representing the Education crowdfunding category."
+    },
+    "category_creative": {
+      "url": "https://images.unsplash.com/photo-1541753866388-0b3c701627d3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTJ8MHwxfHNlYXJjaHwxfHxhcnRpc3QlMjBwYWludGluZyUyMHN0dWRpb3xlbnwwfHx8fDE3ODI1NTE4OTl8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Artist painting in a studio, representing the Creative crowdfunding category."
+    },
+    "category_memorial": {
+      "url": "https://images.unsplash.com/photo-1528351655744-27cc30462816?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwxfHxjYW5kbGUlMjBsaWdodGluZyUyMG1lbW9yaWFsfGVufDB8fHx8MTc4MjU1MTg5OXww&ixlib=rb-4.1.0&q=85",
+      "description": "Candle lit in a dim setting, representing the Memorial crowdfunding category."
+    }
+  },
+  "accessibility_and_testing": {
+    "contrast": "All text must pass WCAG AA. Deep blue on white is >7:1. Emerald green on white is >3:1 (large text) or >4.5:1 (regular).",
+    "testing_attributes": "All interactive and key informational elements MUST include a data-testid attribute (e.g., data-testid='donate-button-paypal', data-testid='campaign-progress-bar')."
+  },
+  "instructions_to_main_agent": [
+    "Install the required fonts: Outfit and DM Sans via Google Fonts.",
+    "Setup Tailwind configuration to include the custom colors (primary: deep blue, accent: emerald, etc.) and fonts.",
+    "Build the public landing page with a clean, light-mode Bento grid layout and use the provided media URLs for categories and hero.",
+    "Implement the Campaign details page ensuring the progress bar uses the accent color and has a clear 'Donate via PayPal' CTA.",
+    "Build the dashboards (Fundraiser and Admin) using Shadcn components, prioritizing data density and functional clarity with 'Control Room' grid layout.",
+    "Use lucide-react for all iconography.",
+    "Always apply `data-testid` to all forms, buttons, links, and important data readouts."
+  ]
+}

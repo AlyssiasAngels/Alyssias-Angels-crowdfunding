@@ -1,0 +1,76 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 327 73% 97%; /* soft blush pink — tailwind pink-50 */
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 224 76% 33%; /* deep blue-900 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 340 60% 96%; /* warm rose */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 340 60% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 158 64% 31%; /* emerald-600 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 340 30% 90%; /* gentle rose-tinted border */
+    --input: 340 30% 90%;
+    --ring: 158 64% 31%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "DM Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Outfit", sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-heading { font-family: "Outfit", sans-serif; }
+  .font-body { font-family: "DM Sans", sans-serif; }
+}
+
+/* Custom progress bar animation */
+@keyframes progressFill {
+  from { width: 0%; }
+}
+.progress-animate > div {
+  animation: progressFill 1s ease-out;
+}
+
+/* Subtle grain overlay for hero */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px);
+  background-size: 3px 3px;
+  pointer-events: none;
+}
+
+[data-debug-wrapper="true"] {
+  display: contents !important;
+}

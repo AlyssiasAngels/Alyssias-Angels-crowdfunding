@@ -743,7 +743,7 @@ async def create_campaign(body: CampaignCreateIn, user: dict = Depends(require_v
     return campaign
 
 
-@api.get("/c/{share_code}")
+@api.get("/api/c/{share_code}")
 async def resolve_share_code(share_code: str):
     c = await db.campaigns.find_one(
         {"share_code": share_code.lower()}, {"_id": 0}
@@ -1743,4 +1743,5 @@ async def on_shutdown():
 
 
 app.include_router(api)
+
 

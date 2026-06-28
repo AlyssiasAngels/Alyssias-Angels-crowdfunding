@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+﻿import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api, formatApiError } from "../lib/api";
 
@@ -9,7 +9,7 @@ export default function ShareCodeRedirect() {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get(`/c/${encodeURIComponent(code)}`);
+        const { data } = await api.get(`/api/c/${encodeURIComponent(code)}`);
         navigate(`/campaigns/${data.id}`, { replace: true });
       } catch (err) {
         // Fallback: bounce to discover if share code doesn't resolve
@@ -21,7 +21,8 @@ export default function ShareCodeRedirect() {
 
   return (
     <div className="min-h-screen flex items-center justify-center text-slate-500" data-testid="share-redirect">
-      Loading campaign…
+      Loading campaignâ€¦
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { api, fmtUSD, formatApiError, imageUrl, CATEGORY_IMAGES } from "../lib/api";
@@ -74,7 +74,7 @@ export default function Dashboard() {
         amount_requested: Number(amount),
         payout_method: "bank",
       });
-      toast.success("Payout request submitted — admin will process in 2–5 business days");
+      toast.success("Payout request submitted â€” admin will process in 2â€“5 business days");
       setPayoutOpen(false);
       await load();
     } catch (e) {
@@ -147,7 +147,7 @@ export default function Dashboard() {
         {/* Campaigns list */}
         <h2 className="font-heading text-xl font-semibold text-blue-900 mb-4">Campaigns</h2>
         {loading ? (
-          <div className="text-slate-500">Loading…</div>
+          <div className="text-slate-500">Loadingâ€¦</div>
         ) : campaigns.length === 0 ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center" data-testid="dashboard-empty">
             <p className="text-slate-600 mb-4">You haven&apos;t created any campaigns yet.</p>
@@ -242,7 +242,8 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto overflow-y-auto max-h-96">
+              <table className="w-full text-xs">
               <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                 <tr>
                   <th className="text-left px-4 py-3">Campaign</th>
@@ -258,7 +259,7 @@ export default function Dashboard() {
                     <td className="px-4 py-3 text-slate-900">{p.campaign_title}</td>
                     <td className="px-4 py-3 text-slate-600 text-xs">
                       {p.payout_method === "paypal" ? (
-                        <span>PayPal · {p.payout_paypal_email}</span>
+                        <span>PayPal Â· {p.payout_paypal_email}</span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5">
                           <Landmark className="h-3.5 w-3.5 text-blue-700" />
@@ -275,6 +276,7 @@ export default function Dashboard() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </main>
@@ -310,7 +312,7 @@ export default function Dashboard() {
                   <Landmark className="h-4 w-4" /> Sending to your bank
                 </p>
                 <p className="text-blue-900/90 mt-1">
-                  {bankDetails.bank_name} — {bankDetails.bank_country}
+                  {bankDetails.bank_name} â€” {bankDetails.bank_country}
                 </p>
                 <p className="text-xs text-blue-900/70 mt-0.5">
                   {bankDetails.iban
@@ -329,8 +331,8 @@ export default function Dashboard() {
               </div>
             )}
             <p className="text-xs text-slate-500">
-              Approved payouts settle in <span className="font-semibold">2–5 business days</span>.
-              International transfers may take 1–2 days longer.
+              Approved payouts settle in <span className="font-semibold">2â€“5 business days</span>.
+              International transfers may take 1â€“2 days longer.
             </p>
           </div>
           <DialogFooter>
@@ -348,7 +350,7 @@ export default function Dashboard() {
               className="rounded-xl bg-blue-900 hover:bg-blue-950 text-white"
               data-testid="payout-submit-button"
             >
-              {submitting ? "Submitting…" : "Submit request"}
+              {submitting ? "Submittingâ€¦" : "Submit request"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -376,7 +378,7 @@ function BankDetailsBanner({ bankDetails }) {
             Bank payouts set up
           </p>
           <p className="text-emerald-900/80 truncate">
-            {bankDetails.bank_name} · {bankDetails.bank_country} ·{" "}
+            {bankDetails.bank_name} Â· {bankDetails.bank_country} Â·{" "}
             {bankDetails.iban
               ? `IBAN ending ${bankDetails.iban.replace(/\s/g, "").slice(-4)}`
               : `Acct ending ${(bankDetails.account_number || "").slice(-4)}`}
@@ -403,7 +405,7 @@ function BankDetailsBanner({ bankDetails }) {
           Add your bank details to receive payouts
         </p>
         <p className="text-sm mt-1 text-amber-800">
-          We send international bank transfers — settles in 2–5 business days.
+          We send international bank transfers â€” settles in 2â€“5 business days.
           Saved once, attached automatically to every payout request.
         </p>
       </div>
@@ -513,7 +515,7 @@ function EmailVerifyBanner({ user }) {
         className="rounded-xl bg-blue-900 hover:bg-blue-950 text-white shrink-0"
         data-testid="email-verify-resend-button"
       >
-        {sending ? "Sending…" : "Resend email"}
+        {sending ? "Sendingâ€¦" : "Resend email"}
       </Button>
     </div>
   );
@@ -529,7 +531,7 @@ function KycBanner({ user }) {
     none: {
       icon: <ShieldAlert className="h-5 w-5 text-amber-600" />,
       title: "Verify your identity to enable payouts",
-      body: "Upload a government-issued ID and your legal name. We review submissions within 1–2 business days.",
+      body: "Upload a government-issued ID and your legal name. We review submissions within 1â€“2 business days.",
       cta: "Verify identity",
       tone: "bg-amber-50 border-amber-200",
       titleColor: "text-amber-900",
@@ -538,7 +540,7 @@ function KycBanner({ user }) {
     pending: {
       icon: <ClockIcon className="h-5 w-5 text-blue-700" />,
       title: "Identity verification under review",
-      body: "We'll notify you by email once review is complete. You can still create campaigns and request payouts in the meantime — approvals require verification.",
+      body: "We'll notify you by email once review is complete. You can still create campaigns and request payouts in the meantime â€” approvals require verification.",
       cta: "View status",
       tone: "bg-blue-50 border-blue-200",
       titleColor: "text-blue-900",
@@ -568,4 +570,6 @@ function KycBanner({ user }) {
     </div>
   );
 }
+
+
 

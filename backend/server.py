@@ -55,8 +55,6 @@ db = client[DB_NAME]
 JWT_ALGORITHM = "HS256"
 JWT_ACCESS_MINUTES = 60 * 24  # 1 day for convenience
 APP_NAME = os.environ.get("APP_NAME", "ledger-crowdfunding")
-STORAGE_URL = "https://integrations.emergentagent.com/objstore/api/v1/storage"
-EMERGENT_KEY = os.environ.get("EMERGENT_LLM_KEY")
 
 # Resend
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
@@ -72,7 +70,6 @@ if RESEND_API_KEY:
 MAX_LOGIN_ATTEMPTS = 5
 LOCKOUT_MINUTES = 15
 
-storage_key: Optional[str] = None
 
 # ---------- App ----------
 app = FastAPI(title="Platform Ledger Crowdfunding")
@@ -346,52 +343,58 @@ class ResendVerifyIn(BaseModel):
     email: EmailStr
 
 
-# ---------- Object Storage ----------
-def init_storage() -> Optional[str]:
-    global storage_key
-    if storage_key:
-        return storage_key
-    if not EMERGENT_KEY:
-        logger.warning("EMERGENT_LLM_KEY not set; storage disabled")
+# ---------- Object Storage (Cloudflare R2) ----------
+import boto3
+from botocore.client import Config
+
+R2_ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID")
+R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID")
+R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY")
+R2_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME")
+R2_ENDPOINT = os.environ.get("R2_ENDPOINT")
+
+_r2_client = None
+
+
+def get_r2_client():
+    global _r2_client
+    if _r2_client:
+        return _r2_client
+    if not all([R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT, R2_BUCKET_NAME]):
+        logger.warning("R2 storage env vars not fully set; storage disabled")
         return None
-    try:
-        r = requests.post(
-            f"{STORAGE_URL}/init", json={"emergent_key": EMERGENT_KEY}, timeout=30
-        )
-        r.raise_for_status()
-        storage_key = r.json()["storage_key"]
-        logger.info("Object storage initialized")
-        return storage_key
-    except Exception as e:
-        logger.error(f"Storage init failed: {e}")
-        return None
+    _r2_client = boto3.client(
+        "s3",
+        endpoint_url=R2_ENDPOINT,
+        aws_access_key_id=R2_ACCESS_KEY_ID,
+        aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+        config=Config(signature_version="s3v4"),
+        region_name="auto",
+    )
+    return _r2_client
 
 
 def put_object(path: str, data: bytes, content_type: str) -> dict:
-    key = init_storage()
-    if not key:
+    client = get_r2_client()
+    if not client:
         raise HTTPException(status_code=500, detail="Storage not available")
-    r = requests.put(
-        f"{STORAGE_URL}/objects/{path}",
-        headers={"X-Storage-Key": key, "Content-Type": content_type},
-        data=data,
-        timeout=120,
+    client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=path,
+        Body=data,
+        ContentType=content_type,
     )
-    r.raise_for_status()
-    return r.json()
+    return {"path": path}
 
 
 def get_object(path: str):
-    key = init_storage()
-    if not key:
+    client = get_r2_client()
+    if not client:
         raise HTTPException(status_code=500, detail="Storage not available")
-    r = requests.get(
-        f"{STORAGE_URL}/objects/{path}",
-        headers={"X-Storage-Key": key},
-        timeout=60,
-    )
-    r.raise_for_status()
-    return r.content, r.headers.get("Content-Type", "application/octet-stream")
+    obj = client.get_object(Bucket=R2_BUCKET_NAME, Key=path)
+    data = obj["Body"].read()
+    content_type = obj.get("ContentType", "application/octet-stream")
+    return data, content_type
 
 
 # ---------- Routes ----------
@@ -1717,9 +1720,6 @@ async def on_startup():
         logger.info(f"Admin already exists: {admin_email}")
 
     # Initialize storage (best effort)
-    init_storage()
-
-
 @app.on_event("shutdown")
 async def on_shutdown():
     client.close()

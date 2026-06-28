@@ -1,4 +1,4 @@
-from dotenv import load_dotenv
+﻿from dotenv import load_dotenv
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
@@ -384,7 +384,7 @@ def put_object(path: str, data: bytes, content_type: str) -> dict:
         Body=data,
         ContentType=content_type,
     )
-    return {"path": path}
+    return {"path": path, "size": len(data)}
 
 
 def get_object(path: str):
@@ -583,7 +583,7 @@ async def login(body: LoginIn, request: Request):
             )
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # Successful login — clear attempts
+    # Successful login â€” clear attempts
     await db.login_attempts.delete_one({"identifier": ident})
 
     token = create_access_token(user["id"], user["email"], user["role"])
@@ -1027,7 +1027,7 @@ async def admin_assign_paypal(
             link = f"{FRONTEND_URL}/campaigns/{campaign_id}"
             body_html = f"""
               <p>Hi {owner.get('full_name', 'there')},</p>
-              <p>Great news — your campaign <strong>{updated['title']}</strong> is now live and ready to receive donations.</p>
+              <p>Great news â€” your campaign <strong>{updated['title']}</strong> is now live and ready to receive donations.</p>
               <p>Share it with your network to start raising support.</p>
             """
             html = _email_html_wrap(
@@ -1213,7 +1213,7 @@ async def request_payout(body: PayoutRequestIn, user: dict = Depends(require_ver
         "requested_at": now_iso(),
         "processed_at": None,
         "admin_notes": None,
-        "expected_settlement": "2–5 business days from approval",
+        "expected_settlement": "2â€“5 business days from approval",
     }
     # Lock the funds
     await db.campaigns.update_one(
@@ -1230,12 +1230,12 @@ async def request_payout(body: PayoutRequestIn, user: dict = Depends(require_ver
           <strong>Payout method:</strong> Bank transfer<br/>
           <strong>Account holder:</strong> {bank.get('account_holder_name', '')}<br/>
           <strong>Bank:</strong> {bank.get('bank_name', '')} ({bank.get('bank_country', '')})<br/>
-          <strong>IBAN:</strong> {bank.get('iban') or '—'}<br/>
-          <strong>Account #:</strong> {bank.get('account_number') or '—'}<br/>
-          <strong>SWIFT/BIC:</strong> {bank.get('swift_bic') or '—'}<br/>
-          <strong>Routing / sort code:</strong> {bank.get('routing_number') or '—'}<br/>
-          <strong>Bank address:</strong> {bank.get('bank_address') or '—'}<br/>
-          <strong>Reference:</strong> {bank.get('reference') or '—'}<br/>
+          <strong>IBAN:</strong> {bank.get('iban') or 'â€”'}<br/>
+          <strong>Account #:</strong> {bank.get('account_number') or 'â€”'}<br/>
+          <strong>SWIFT/BIC:</strong> {bank.get('swift_bic') or 'â€”'}<br/>
+          <strong>Routing / sort code:</strong> {bank.get('routing_number') or 'â€”'}<br/>
+          <strong>Bank address:</strong> {bank.get('bank_address') or 'â€”'}<br/>
+          <strong>Reference:</strong> {bank.get('reference') or 'â€”'}<br/>
         """
     else:
         dest_html = f"<strong>Payout method:</strong> PayPal<br/><strong>PayPal email:</strong> {payout_destination.get('paypal_email', '')}<br/>"
@@ -1247,8 +1247,8 @@ async def request_payout(body: PayoutRequestIn, user: dict = Depends(require_ver
           <p><strong>Campaign:</strong> {c['title']}<br/>
           <strong>Amount:</strong> ${d2(body.amount_requested):.2f}<br/>
           {dest_html}
-          <strong>Identity verified:</strong> {'Yes' if user_full.get('identity_verified') else 'No — review KYC first'}</p>
-          <p>Settlement window: 2–5 business days from approval.</p>
+          <strong>Identity verified:</strong> {'Yes' if user_full.get('identity_verified') else 'No â€” review KYC first'}</p>
+          <p>Settlement window: 2â€“5 business days from approval.</p>
         """,
         "Review in admin panel",
         link,
@@ -1319,7 +1319,7 @@ async def admin_payout_decision(body: PayoutDecisionIn, admin: dict = Depends(re
         "Rejected": "Your payout was rejected",
     }
     intro_map = {
-        "Approved": "Good news — your payout request has been approved and is queued for processing.",
+        "Approved": "Good news â€” your payout request has been approved and is queued for processing.",
         "Paid": "Your funds have been sent to your PayPal account.",
         "Rejected": "Unfortunately, your payout request was rejected. The funds have been returned to your campaign balance.",
     }
@@ -1726,3 +1726,4 @@ async def on_shutdown():
 
 
 app.include_router(api)
+

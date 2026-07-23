@@ -41,7 +41,7 @@ export default function Donate() {
   }, [id]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || loading || !campaign || campaign.status !== "Active") return;
 
     function renderButtons() {
       if (buttonsRenderedRef.current || !paypalContainerRef.current || !window.paypal) return;
@@ -123,7 +123,7 @@ export default function Donate() {
     script.onload = () => { renderButtons(); setButtonsReady(true); };
     script.onerror = () => setError("Could not load PayPal. Please refresh and try again.");
     document.body.appendChild(script);
-  }, [id]);
+  }, [id, loading, campaign]);
 
   if (loading) return (<div className="min-h-screen bg-background"><Navbar /><div className="text-center py-20 text-slate-500">Loading...</div></div>);
   if (!campaign) return (<div className="min-h-screen bg-background"><Navbar /><div className="max-w-md mx-auto py-20 text-center"><p className="text-slate-600 mb-4">Campaign not found.</p><Button asChild className="rounded-xl bg-blue-900 hover:bg-blue-950 text-white"><Link to="/discover">Browse campaigns</Link></Button></div></div>);

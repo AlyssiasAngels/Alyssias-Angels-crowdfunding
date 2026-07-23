@@ -117,3 +117,23 @@ def find_approval_url(order: dict) -> Optional[str]:
             return link.get("href")
     return None
 
+
+
+def get_client_token() -> str:
+    token = get_access_token()
+    r = requests.post(
+        f"{BASE_URL}/v1/identity/generate-token",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        timeout=20,
+    )
+    r.raise_for_status()
+    return r.json()["client_token"]
+
+
+
+
+

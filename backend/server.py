@@ -1745,3 +1745,14 @@ async def on_shutdown():
 app.include_router(api)
 
 
+
+
+@api.post("/donate/client-token")
+async def donate_client_token():
+    try:
+        token = paypal_client.get_client_token()
+        return {"client_token": token}
+    except Exception as e:
+        logger.error(f"PayPal client token error: {e}")
+        raise HTTPException(status_code=502, detail="Could not get client token")
+

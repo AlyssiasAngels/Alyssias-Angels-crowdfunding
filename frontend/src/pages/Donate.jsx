@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { api, fmtUSD, imageUrl, CATEGORY_IMAGES, formatApiError } from "../lib/api";
@@ -7,23 +7,10 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
-import { Heart, Loader2, ShieldCheck, Lock, CreditCard } from "lucide-react";
+import { Heart, Loader2, ShieldCheck, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 const QUICK_AMOUNTS = [10, 25, 50, 100, 250];
-const PAYPAL_CLIENT_ID = process.env.REACT_APP_PAYPAL_CLIENT_ID;
-
-function loadPayPalScript(clientId, clientToken) {
-  return new Promise((resolve, reject) => {
-    if (window.paypal) { resolve(window.paypal); return; }
-    const script = document.createElement("script");
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&components=hosted-fields,buttons&intent=capture`;
-    script.setAttribute("data-client-token", clientToken);
-    script.onload = () => resolve(window.paypal);
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-}
 
 export default function Donate() {
   const { id } = useParams();
@@ -34,10 +21,6 @@ export default function Donate() {
   const [donorName, setDonorName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [payMethod, setPayMethod] = useState("card");
-  const [sdkReady, setSdkReady] = useState(false);
-  const [clientToken, setClientToken] = useState(null);
-  const hostedFieldsRef = useRef(null);
 
   useEffect(() => {
     api.get(`/campaigns/${id}`)
@@ -45,69 +28,6 @@ export default function Donate() {
       .catch(() => setCampaign(null))
       .finally(() => setLoading(false));
   }, [id]);
-
-  useEffect(() => {
-    api.post("/donate/client-token")
-      .then((r) => setClientToken(r.data.client_token))
-      .catch(() => setClientToken(null));
-  }, []);
-
-  useEffect(() => {
-    if (!PAYPAL_CLIENT_ID || !clientToken) return;
-    loadPayPalScript(PAYPAL_CLIENT_ID, clientToken)
-      .then(() => setSdkReady(true))
-      .catch(() => toast.error("Could not load payment SDK"));
-  }, [clientToken]);
-
-  useEffect(() => {
-    if (!sdkReady || payMethod !== "card") return;
-    if (!window.paypal?.HostedFields?.isEligible()) {
-      toast.error("Card payments not available, please use PayPal");
-      return;
-    }
-    if (hostedFieldsRef.current) return;
-    window.paypal.HostedFields.render({
-      createOrder: async () => {
-        const amt = Number(amount);
-        const { data } = await api.post("/donate/create", {
-          campaign_id: id,
-          amount: amt,
-          donor_name: donorName || "Anonymous",
-        });
-        return data.order_id;
-      },
-      styles: {
-        input: { "font-size": "16px", "font-family": "inherit", color: "#1e3a8a" },
-        ".valid": { color: "#059669" },
-        ".invalid": { color: "#dc2626" },
-      },
-      fields: {
-        number: { selector: "#card-number", placeholder: "Card number" },
-        cvv: { selector: "#cvv", placeholder: "CVV" },
-        expirationDate: { selector: "#expiry", placeholder: "MM/YYYY" },
-      },
-    }).then((hf) => { hostedFieldsRef.current = hf; })
-      .catch(() => toast.error("Card fields could not load"));
-  }, [sdkReady, payMethod]);
-
-  const onCardPay = async () => {
-    setError("");
-    const amt = Number(amount);
-    if (isNaN(amt) || amt < 5) { setError("Minimum donation is $5.00"); return; }
-    if (!hostedFieldsRef.current) { setError("Card fields not ready, please wait"); return; }
-    setSubmitting(true);
-    try {
-      const result = await hostedFieldsRef.current.submit({ cardholderName: donorName || "Anonymous" });
-      await api.post("/donate/capture", { order_id: result.orderId });
-      toast.success("Thank you for your donation!");
-      navigate(`/campaigns/${id}?donated=1`);
-    } catch (err) {
-      setError(formatApiError(err) || "Payment failed, please try again");
-      toast.error("Payment failed");
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const onPayPal = async () => {
     setError("");
@@ -166,7 +86,7 @@ export default function Donate() {
           <section className="lg:col-span-3">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600 mb-2">Make a donation</p>
             <h1 className="font-heading text-3xl sm:text-4xl font-bold text-blue-900 tracking-tight mb-3">Support {campaign.creator_name}'s campaign</h1>
-            <p className="text-slate-600 mb-8 max-w-xl">Choose an amount and pay securely by card or PayPal. Every dollar is tracked transparently in our ledger.</p>
+            <p className="text-slate-600 mb-8 max-w-xl">Choose an amount and pay securely with PayPal or a card. Every dollar is tracked transparently in our ledger.</p>
 
             <div className="bg-white border border-slate-200 rounded-2xl p-6 lg:p-8 space-y-6">
               <div>
@@ -196,54 +116,14 @@ export default function Donate() {
                 <p className="text-xs text-slate-500 mt-1">Shown on the donations wall. Leave blank to remain anonymous.</p>
               </div>
 
-              <div>
-                <Label className="text-slate-700 mb-2 block">Payment method</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => setPayMethod("card")}
-                    className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-colors ${payMethod === "card" ? "bg-blue-900 border-blue-900 text-white" : "bg-white border-slate-200 text-slate-700 hover:border-blue-300"}`}>
-                    <CreditCard className="h-4 w-4" /> Pay by Card
-                  </button>
-                  <button type="button" onClick={() => setPayMethod("paypal")}
-                    className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-semibold transition-colors ${payMethod === "paypal" ? "bg-blue-900 border-blue-900 text-white" : "bg-white border-slate-200 text-slate-700 hover:border-blue-300"}`}>
-                    <Heart className="h-4 w-4" /> Pay with PayPal
-                  </button>
-                </div>
-              </div>
-
-              {payMethod === "card" && (
-                <div className="space-y-3">
-                  <div>
-                    <Label className="text-slate-700 text-xs mb-1 block">Card number</Label>
-                    <div id="card-number" className="border border-slate-200 rounded-xl px-4 h-12 bg-white" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-slate-700 text-xs mb-1 block">Expiry</Label>
-                      <div id="expiry" className="border border-slate-200 rounded-xl px-4 h-12 bg-white" />
-                    </div>
-                    <div>
-                      <Label className="text-slate-700 text-xs mb-1 block">CVV</Label>
-                      <div id="cvv" className="border border-slate-200 rounded-xl px-4 h-12 bg-white" />
-                    </div>
-                  </div>
-                  {!sdkReady && <p className="text-xs text-slate-400">Loading card fields...</p>}
-                </div>
-              )}
-
               {error && <div className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{error}</div>}
               {!isOpen && <div className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">This campaign is not currently accepting donations.</div>}
 
-              {payMethod === "card" ? (
-                <Button onClick={onCardPay} disabled={submitting || !isOpen || !sdkReady}
-                  className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold h-14">
-                  {submitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Processing...</> : <><CreditCard className="h-4 w-4 mr-2" />Pay {amount ? fmtUSD(amount) : ""} by Card</>}
-                </Button>
-              ) : (
-                <Button onClick={onPayPal} disabled={submitting || !isOpen}
-                  className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold h-14">
-                  {submitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Connecting to PayPal...</> : <><Heart className="h-4 w-4 mr-2" />Pay {amount ? fmtUSD(amount) : ""} with PayPal</>}
-                </Button>
-              )}
+              <Button onClick={onPayPal} disabled={submitting || !isOpen}
+                className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-base font-semibold h-14">
+                {submitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Connecting to PayPal...</> : <><Heart className="h-4 w-4 mr-2" />Pay {amount ? fmtUSD(amount) : ""} with PayPal</>}
+              </Button>
+              <p className="text-xs text-slate-500 text-center">You'll be taken to PayPal to pay by card or with a PayPal account, securely.</p>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="flex items-center gap-2 text-slate-600 bg-slate-50 rounded-xl px-3 py-2 border border-slate-100">

@@ -1,4 +1,4 @@
-"""PayPal Orders v2 REST API client."""
+﻿"""PayPal Orders v2 REST API client."""
 import os
 import logging
 from typing import Optional
@@ -59,7 +59,7 @@ def create_order(
             "brand_name": brand_name[:127],
             "user_action": "PAY_NOW",
             "shipping_preference": "NO_SHIPPING",
-            "landing_page": "NO_PREFERENCE",
+            "landing_page": "BILLING",
         },
     }
     r = requests.post(
@@ -116,3 +116,4 @@ def find_approval_url(order: dict) -> Optional[str]:
         if link.get("rel") in ("approve", "payer-action"):
             return link.get("href")
     return None
+
